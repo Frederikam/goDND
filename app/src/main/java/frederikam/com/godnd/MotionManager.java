@@ -22,14 +22,42 @@
 
 package frederikam.com.godnd;
 
-public class MotionHandler extends Thread {
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-    public MotionHandler() {
+public class MotionManager extends Thread {
 
+    private static final Logger log = LoggerFactory.getLogger(MotionManager.class);
+    private static final int MOTION_THRESHOLD_HIGH = 2; // m/s
+    private static final int MOTION_THRESHOLD_LOW = 1; // m/s
+    private static final int SLEEP_INTERVAL = 500; // ms
+
+    private MotionTracker tracker = new MotionTracker(500, 60);
+    private boolean inMotion = false;
+
+    public MotionManager() {
+        setDaemon(true);
+        setName("MotionManager");
     }
 
     @Override
     public void run() {
+         while (true) {
+             try {
+                 sleep(SLEEP_INTERVAL);
+             } catch (InterruptedException e) {
+                 throw new RuntimeException(e);
+             }
+         }
+    }
 
+    private void tick() {
+        if (!inMotion && tracker.getAverageMotion() > MOTION_THRESHOLD_HIGH) {
+            inMotion = true;
+            MainActivity.INSTANCE.onMotionChanged(true);
+        } else if (inMotion && tracker.getAverageMotion() < MOTION_THRESHOLD_LOW) {
+            inMotion = false;
+            MainActivity.INSTANCE.onMotionChanged(false);
+        }
     }
 }
