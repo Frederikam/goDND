@@ -20,9 +20,11 @@
  *  SOFTWARE.
  */
 
-package frederikam.com.godnd;
+package frederikam.com.godnd.physics;
 
 import android.util.Log;
+
+import frederikam.com.godnd.MainActivity;
 
 import static frederikam.com.godnd.MainActivity.TAG;
 

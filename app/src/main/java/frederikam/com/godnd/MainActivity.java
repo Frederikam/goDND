@@ -38,6 +38,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
+import frederikam.com.godnd.physics.MotionManager;
+import frederikam.com.godnd.physics.MotionManagerEmulator;
+
 public class MainActivity extends AppCompatActivity implements CompoundButton.OnCheckedChangeListener, Button.OnClickListener {
 
     public static final String TAG = "frederikam.com.godnd";

@@ -20,10 +20,12 @@
  *  SOFTWARE.
  */
 
-package frederikam.com.godnd;
+package frederikam.com.godnd.physics;
 
 import android.view.View;
 import android.widget.Button;
+
+import frederikam.com.godnd.MainActivity;
 
 public class MotionManagerEmulator extends MotionManager implements Button.OnClickListener {
 

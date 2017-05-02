@@ -20,7 +20,7 @@
  *  SOFTWARE.
  */
 
-package frederikam.com.godnd;
+package frederikam.com.godnd.physics;
 
 import android.content.Context;
 import android.hardware.Sensor;
@@ -30,6 +30,8 @@ import android.hardware.SensorManager;
 
 import java.util.LinkedList;
 import java.util.Queue;
+
+import frederikam.com.godnd.MainActivity;
 
 public class MotionTracker implements SensorEventListener {
 
