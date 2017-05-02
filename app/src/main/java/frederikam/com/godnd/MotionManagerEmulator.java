@@ -20,41 +20,29 @@
  *  SOFTWARE.
  */
 
-apply plugin: 'com.android.application'
+package frederikam.com.godnd;
 
-android {
-    compileSdkVersion 25
-    buildToolsVersion "25.0.0"
-    defaultConfig {
-        applicationId "frederikam.com.godnd"
-        minSdkVersion 16
-        targetSdkVersion 25
-        versionCode 1
-        versionName "1.0"
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+import android.view.View;
+import android.widget.Button;
+
+public class MotionManagerEmulator extends MotionManager implements Button.OnClickListener {
+
+
+
+    public MotionManagerEmulator(Button button) {
+        button.setOnClickListener(this);
+        button.setVisibility(View.VISIBLE);
     }
-    buildTypes {
-        release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-        }
+
+    @Override
+    public synchronized void start() {
+        // Ignore
     }
-    lintOptions {
-        lintConfig file("lint.xml")
+
+    @Override
+    public void onClick(View v) {
+        inMotion = !inMotion;
+        ((Button) v).setText(inMotion ? "Emulator override motion enabled" : "Emulator override motion disabled");
+        MainActivity.INSTANCE.onMotionChanged(inMotion);
     }
-}
-
-dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
-        exclude group: 'com.android.support', module: 'support-annotations'
-    })
-    compile 'com.android.support:appcompat-v7:25.3.1'
-    compile 'com.android.support:design:25.3.1'
-
-    compile 'com.github.tony19:logback-android-core:1.1.1-6'
-    compile 'com.github.tony19:logback-android-classic:1.1.1-6'
-    compile 'org.slf4j:slf4j-api:1.7.21'
-
-    testCompile 'junit:junit:4.12'
 }

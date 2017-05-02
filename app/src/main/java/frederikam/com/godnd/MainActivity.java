@@ -22,19 +22,62 @@
 
 package frederikam.com.godnd;
 
+import android.annotation.SuppressLint;
+import android.content.Context;
+import android.content.pm.PackageManager;
+import android.hardware.SensorManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.Menu;
-import android.view.MenuItem;
+import android.util.Log;
+import android.view.View;
+import android.widget.Button;
+import android.widget.CompoundButton;
+import android.widget.TextView;
+import android.widget.Toast;
+import android.widget.ToggleButton;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements CompoundButton.OnCheckedChangeListener, Button.OnClickListener {
+
+    public static final String TAG = "frederikam.com.godnd";
 
     public static MainActivity INSTANCE;
+
+    // http://stackoverflow.com/questions/2799097/how-can-i-detect-when-an-android-application-is-running-in-the-emulator
+    public static final boolean IS_EMULATOR = Build.FINGERPRINT.startsWith("generic")
+            || Build.FINGERPRINT.startsWith("unknown")
+            || Build.MODEL.contains("google_sdk")
+            || Build.MODEL.contains("Emulator")
+            || Build.MODEL.contains("Android SDK built for x86")
+            || Build.MANUFACTURER.contains("Genymotion")
+            || (Build.BRAND.startsWith("generic") && Build.DEVICE.startsWith("generic"))
+            || "google_sdk".equals(Build.PRODUCT);
+
+    private TextView textStatus = null;
+    private ToggleButton toggleButton = null;
+    private Button passengerButton = null;
+    private TextView passengerText = null;
+    private MotionManager motionManager = null;
+
+
+    private boolean isPassengerMode = false;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        SensorManager sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+
+        PackageManager PM= this.getPackageManager();
+        if(PM.hasSystemFeature(PackageManager.FEATURE_SENSOR_ACCELEROMETER)) {
+            Toast toast = Toast.makeText(getApplicationContext(), "This device does not support the required sensors", Toast.LENGTH_LONG);
+            toast.show();
+        }
+
+        Log.i(TAG, "Creating activity: " + toString());
 
         INSTANCE = this;
 
@@ -42,32 +85,74 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        new MotionManager().start();
-    }
+        textStatus = (TextView) findViewById(R.id.textStatus);
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
-    }
+        toggleButton = (ToggleButton) findViewById(R.id.toggleButton);
+        toggleButton.setOnCheckedChangeListener(this);
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
+        passengerButton = (Button) findViewById(R.id.passengerButton);
+        passengerButton.setOnClickListener(this);
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
+        passengerText = (TextView) findViewById(R.id.passengerText);
+
+        // The emulator does not support our sensors :/
+        if(!IS_EMULATOR) {
+            motionManager = new MotionManager();
+            motionManager.start();
+        } else {
+            motionManager = new MotionManagerEmulator((Button) findViewById(R.id.emulatorMotion));
         }
 
-        return super.onOptionsItemSelected(item);
+        render();
     }
 
     public void onMotionChanged(boolean inMotion) {
+        isPassengerMode = false;
+        render();
+    }
+
+    @Override
+    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+        // Toggle button
+        render();
+    }
+
+    @Override
+    public void onClick(View v) {
+        // Passenger button
+        isPassengerMode = !isPassengerMode;
+        ((Button) v).setText(isPassengerMode ? "Enter passenger mode" : "Exit passenger mode");
+        render();
+    }
+
+    @SuppressLint("SetTextI18n")
+    private void render() {
+        // Passenger mode, motion change or disable/disable
+        boolean inMotion = motionManager.isInMotion();
+        boolean isEnabled = toggleButton.isChecked();
+
+        Log.i(TAG, "Render: inMotion:"+inMotion + " isEnabled:"+isEnabled + " isPassengerMode"+isPassengerMode);
+
+        if (isEnabled) {
+            textStatus.setVisibility(View.VISIBLE);
+            passengerButton.setVisibility(inMotion ? View.VISIBLE : View.INVISIBLE);
+            passengerText.setVisibility(inMotion ? View.VISIBLE : View.INVISIBLE);
+
+            if(!inMotion) {
+                textStatus.setText("You are not in motion. Move around for a few seconds and you" +
+                        "the app will enable do not disturb mode.");
+            } else if (!isPassengerMode) {
+                textStatus.setText("You are now in motion and incoming SMS and calls have been" +
+                        "disabled. Turn on passenger to temporarily disable the app.");
+            } else {
+                textStatus.setText("Passenger mode enabled.");
+            }
+        } else {
+            textStatus.setVisibility(View.INVISIBLE);
+            passengerButton.setVisibility(View.INVISIBLE);
+            passengerText.setVisibility(View.INVISIBLE);
+        }
+
 
     }
 }

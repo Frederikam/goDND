@@ -21,6 +21,7 @@
   ~  SOFTWARE.
   -->
 
+<!--suppress XmlUnboundNsPrefix -->
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -39,48 +40,50 @@
         android:id="@+id/toggleButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="43dp"
-        android:text="ToggleButton"
-        android:layout_below="@+id/Title"
-        android:layout_centerHorizontal="true" />
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="15dp"
+        android:checked="true"
+        android:text="ToggleButton" />
 
     <Button
         android:id="@+id/passengerButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Enter passenger mode"
-        android:layout_centerVertical="true"
-        android:layout_centerHorizontal="true" />
+        android:layout_below="@+id/textStatus"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="23dp" />
 
     <TextView
-        android:id="@+id/textView2"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="goDND"
-        android:textAppearance="@style/TextAppearance.AppCompat.Title"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
-
-    <TextView
-        android:id="@+id/textInMotion"
+        android:id="@+id/textStatus"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_above="@+id/textView4"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:layout_marginBottom="52dp"
-        android:text="You are now in motion.  Want to enter passenger mode?"
-        android:textAppearance="@style/TextAppearance.AppCompat.Large" />
+        android:layout_below="@+id/toggleButton"
+        android:layout_marginTop="43dp"
+        android:text="You are now in motion. Want to enter passenger mode?"
+        android:textAppearance="@style/TextAppearance.AppCompat.Title" />
 
     <TextView
-        android:id="@+id/textView4"
+        android:id="@+id/passengerText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:layout_below="@+id/passengerButton"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="21dp"
         android:text="This will automatically be disabled after you stop moving." />
+
+    <Button
+        android:id="@+id/emulatorMotion"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="36dp"
+        android:text="Emulator override motion enabled"
+        android:visibility="gone" />
 
 </RelativeLayout>

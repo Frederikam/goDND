@@ -28,17 +28,10 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.LinkedList;
 import java.util.Queue;
 
-import javax.vecmath.Vector3d;
-
 public class MotionTracker implements SensorEventListener {
-
-    private static final Logger log = LoggerFactory.getLogger(MotionTracker.class);
 
     private final Queue<Double> motion = new LinkedList<>();
     private final int minHistory;
@@ -78,15 +71,8 @@ public class MotionTracker implements SensorEventListener {
         if(lastEventSavedTime - System.currentTimeMillis() > sleepInterval)
             return;
 
-        // Cast to doubles
-        double[] doubles = new double[3];
-
-        for (int i = 0; i < 3; i++) {
-            doubles[i] = event.values[i];
-        }
-        
-        Vector3d vec = new Vector3d(doubles);
-        motion.add(vec.length());
+        double len = Math.sqrt((event.values[0]*event.values[0] + event.values[1]*event.values[1] + event.values[2]*event.values[2]));
+        motion.add(len);
 
         if(motion.size() > maxHistory) {
             // Clear old data

@@ -22,18 +22,18 @@
 
 package frederikam.com.godnd;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import android.util.Log;
+
+import static frederikam.com.godnd.MainActivity.TAG;
 
 public class MotionManager extends Thread {
 
-    private static final Logger log = LoggerFactory.getLogger(MotionManager.class);
     private static final int MOTION_THRESHOLD_HIGH = 2; // m/s
     private static final int MOTION_THRESHOLD_LOW = 1; // m/s
     private static final int SLEEP_INTERVAL = 500; // ms
 
-    private MotionTracker tracker = new MotionTracker(500, 60);
-    private boolean inMotion = false;
+    private MotionTracker tracker = new MotionTracker(500, 30);
+    protected boolean inMotion = false;
 
     public MotionManager() {
         setDaemon(true);
@@ -42,6 +42,7 @@ public class MotionManager extends Thread {
 
     @Override
     public void run() {
+        Log.i(TAG, "Started " + getName());
          while (true) {
              try {
                  sleep(SLEEP_INTERVAL);
@@ -59,5 +60,9 @@ public class MotionManager extends Thread {
             inMotion = false;
             MainActivity.INSTANCE.onMotionChanged(false);
         }
+    }
+
+    public boolean isInMotion() {
+        return inMotion;
     }
 }
