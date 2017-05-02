@@ -38,6 +38,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
+import frederikam.com.godnd.dnd.DNDHandler;
 import frederikam.com.godnd.physics.MotionManager;
 import frederikam.com.godnd.physics.MotionManagerEmulator;
 
@@ -57,13 +58,12 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
             || (Build.BRAND.startsWith("generic") && Build.DEVICE.startsWith("generic"))
             || "google_sdk".equals(Build.PRODUCT);
 
+    private DNDHandler dndHandler = new DNDHandler();
     private TextView textStatus = null;
     private ToggleButton toggleButton = null;
     private Button passengerButton = null;
     private TextView passengerText = null;
     private MotionManager motionManager = null;
-
-
     private boolean isPassengerMode = false;
 
 
@@ -124,7 +124,7 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
     public void onClick(View v) {
         // Passenger button
         isPassengerMode = !isPassengerMode;
-        ((Button) v).setText(isPassengerMode ? "Enter passenger mode" : "Exit passenger mode");
+        ((Button) v).setText(isPassengerMode ? "Exit passenger mode" : "Enter passenger mode");
         render();
     }
 
@@ -133,6 +133,8 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
         // Passenger mode, motion change or disable/disable
         boolean inMotion = motionManager.isInMotion();
         boolean isEnabled = toggleButton.isChecked();
+
+        boolean enableDnd = false;
 
         Log.i(TAG, "Render: inMotion:"+inMotion + " isEnabled:"+isEnabled + " isPassengerMode"+isPassengerMode);
 
@@ -147,6 +149,7 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
             } else if (!isPassengerMode) {
                 textStatus.setText("You are now in motion and incoming SMS and calls have been" +
                         "disabled. Turn on passenger to temporarily disable the app.");
+                enableDnd = true;
             } else {
                 textStatus.setText("Passenger mode enabled.");
             }
@@ -156,6 +159,6 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
             passengerText.setVisibility(View.INVISIBLE);
         }
 
-
+        dndHandler.handle(enableDnd);
     }
 }

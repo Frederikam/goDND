@@ -33,7 +33,7 @@ import java.util.Queue;
 
 import frederikam.com.godnd.MainActivity;
 
-public class MotionTracker implements SensorEventListener {
+class MotionTracker implements SensorEventListener {
 
     private final Queue<Double> motion = new LinkedList<>();
     private final int minHistory;
@@ -41,7 +41,7 @@ public class MotionTracker implements SensorEventListener {
     private long lastEventSavedTime = 0;
     private long sleepInterval;
 
-    public MotionTracker(int sleepInterval, int maxHistory) {
+    MotionTracker(int sleepInterval, int maxHistory) {
         this.sleepInterval = sleepInterval;
         this.minHistory = maxHistory/4;
         this.maxHistory = maxHistory;
@@ -52,7 +52,7 @@ public class MotionTracker implements SensorEventListener {
         mSensorManager.registerListener(this, mSensor, sleepInterval);
     }
 
-    public double getAverageMotion() {
+    double getAverageMotion() {
         // Returns a negative number if we have too little history
         if (motion.size() < minHistory) {
             return Double.MIN_VALUE;

@@ -20,7 +20,25 @@
  *  SOFTWARE.
  */
 
-package frederikam.com.godnd;
+package frederikam.com.godnd.dnd;
 
-public class DNDHandler {
+// Cite: http://stackoverflow.com/questions/14087322/enabling-and-disabling-vibration-in-android-programmatically
+
+import android.media.AudioManager;
+
+@SuppressWarnings("deprecation")
+class AudioManagerCompat {
+    final static int VIBRATE_TYPE_RINGER = AudioManager.VIBRATE_TYPE_RINGER;
+    final static int VIBRATE_TYPE_NOTIFICATION = AudioManager.VIBRATE_TYPE_NOTIFICATION;
+    final static int VIBRATE_SETTING_ON = AudioManager.VIBRATE_SETTING_ON;
+    final static int VIBRATE_SETTING_OFF = AudioManager.VIBRATE_SETTING_OFF;
+    final static int VIBRATE_SETTING_ONLY_SILENT = AudioManager.VIBRATE_SETTING_ONLY_SILENT;
+
+    static int getVibrateSetting(AudioManager am, int vibrateType) {
+        return am.getVibrateSetting(vibrateType);
+    }
+
+    static void setVibrateSetting(AudioManager am, int vibrateType, int vibrateSetting) {
+        am.setVibrateSetting(vibrateType, vibrateSetting);
+    }
 }
