@@ -25,4 +25,5 @@
     <color name="colorPrimary">#3ab250</color>
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#3ab28c</color>
+    <color name="colorRed">#FF0000</color>
 </resources>

@@ -98,6 +98,10 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
 
         passengerText = (TextView) findViewById(R.id.passengerText);
 
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+            findViewById(R.id.warningMuteText).setVisibility(View.VISIBLE);
+        }
+
         // The emulator does not support our sensors :/
         if(!IS_EMULATOR) {
             motionManager = new MotionManager();
@@ -105,6 +109,8 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
         } else {
             motionManager = new MotionManagerEmulator((Button) findViewById(R.id.emulatorMotion));
         }
+
+        toggleButton.setPressed(getPreferences(MODE_PRIVATE).getBoolean("isEnabled", true));
 
         render();
     }
@@ -117,6 +123,7 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
     @Override
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
         // Toggle button
+        getPreferences(MODE_PRIVATE).edit().putBoolean("isEnabled", isChecked).apply();
         render();
     }
 
@@ -145,10 +152,10 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
 
             if(!inMotion) {
                 textStatus.setText("You are not in motion. Move around for a few seconds and you" +
-                        "the app will enable do not disturb mode.");
+                        " the app will enable do not disturb mode.");
             } else if (!isPassengerMode) {
                 textStatus.setText("You are now in motion and incoming SMS and calls have been" +
-                        "disabled. Turn on passenger to temporarily disable the app.");
+                        " disabled. Turn on passenger to temporarily disable the app.");
                 enableDnd = true;
             } else {
                 textStatus.setText("Passenger mode enabled.");

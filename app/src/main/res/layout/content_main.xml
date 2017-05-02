@@ -51,9 +51,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Enter passenger mode"
+        android:layout_marginTop="15dp"
         android:layout_below="@+id/textStatus"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="23dp" />
+        android:layout_centerHorizontal="true" />
 
     <TextView
         android:id="@+id/textStatus"
@@ -62,9 +62,9 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:layout_below="@+id/toggleButton"
-        android:layout_marginTop="43dp"
+        android:layout_marginTop="26dp"
         android:text="You are now in motion. Want to enter passenger mode?"
-        android:textAppearance="@style/TextAppearance.AppCompat.Title" />
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
 
     <TextView
         android:id="@+id/passengerText"
@@ -84,6 +84,18 @@
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="36dp"
         android:text="Emulator override motion enabled"
-        android:visibility="gone" />
+        android:visibility="invisible" />
+
+    <TextView
+        android:id="@+id/warningMuteText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/passengerText"
+        android:layout_marginTop="11dp"
+        android:text="Warning: Old version of Android detected. Muting ringer and notifications instead of entering do not disturb."
+        android:textColor="@color/colorRed"
+        android:visibility="invisible" />
 
 </RelativeLayout>
