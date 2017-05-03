@@ -20,25 +20,29 @@
  *  SOFTWARE.
  */
 
-package frederikam.com.godnd.dnd;
+package com.frederikam.godnd;
 
-// Cite: http://stackoverflow.com/questions/14087322/enabling-and-disabling-vibration-in-android-programmatically
+import android.content.Context;
+import android.support.test.InstrumentationRegistry;
+import android.support.test.runner.AndroidJUnit4;
 
-import android.media.AudioManager;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
-@SuppressWarnings("deprecation")
-class AudioManagerCompat {
-    final static int VIBRATE_TYPE_RINGER = AudioManager.VIBRATE_TYPE_RINGER;
-    final static int VIBRATE_TYPE_NOTIFICATION = AudioManager.VIBRATE_TYPE_NOTIFICATION;
-    final static int VIBRATE_SETTING_ON = AudioManager.VIBRATE_SETTING_ON;
-    final static int VIBRATE_SETTING_OFF = AudioManager.VIBRATE_SETTING_OFF;
-    final static int VIBRATE_SETTING_ONLY_SILENT = AudioManager.VIBRATE_SETTING_ONLY_SILENT;
+import static org.junit.Assert.*;
 
-    static int getVibrateSetting(AudioManager am, int vibrateType) {
-        return am.getVibrateSetting(vibrateType);
-    }
+/**
+ * Instrumentation test, which will execute on an Android device.
+ *
+ * @see <a href="http://d.android.com/tools/testing">Testing documentation</a>
+ */
+@RunWith(AndroidJUnit4.class)
+public class ExampleInstrumentedTest {
+    @Test
+    public void useAppContext() throws Exception {
+        // Context of the app under test.
+        Context appContext = InstrumentationRegistry.getTargetContext();
 
-    static void setVibrateSetting(AudioManager am, int vibrateType, int vibrateSetting) {
-        am.setVibrateSetting(vibrateType, vibrateSetting);
+        assertEquals("com.frederikam.godnd", appContext.getPackageName());
     }
 }

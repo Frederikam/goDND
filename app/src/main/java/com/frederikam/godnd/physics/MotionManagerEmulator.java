@@ -20,29 +20,33 @@
  *  SOFTWARE.
  */
 
-package frederikam.com.godnd;
+package com.frederikam.godnd.physics;
 
-import android.content.Context;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.runner.AndroidJUnit4;
+import android.view.View;
+import android.widget.Button;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import com.frederikam.godnd.MainActivity;
 
-import static org.junit.Assert.*;
+public class MotionManagerEmulator extends MotionManager implements Button.OnClickListener {
 
-/**
- * Instrumentation test, which will execute on an Android device.
- *
- * @see <a href="http://d.android.com/tools/testing">Testing documentation</a>
- */
-@RunWith(AndroidJUnit4.class)
-public class ExampleInstrumentedTest {
-    @Test
-    public void useAppContext() throws Exception {
-        // Context of the app under test.
-        Context appContext = InstrumentationRegistry.getTargetContext();
 
-        assertEquals("frederikam.com.godnd", appContext.getPackageName());
+
+    public MotionManagerEmulator(Button button) {
+        button.setOnClickListener(this);
+        button.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    public synchronized void start() {
+        // Ignore
+    }
+
+    @Override
+    public void onClick(View v) {
+        inMotion = !inMotion;
+        ((Button) v).setText(inMotion ? "Emulator override motion enabled" : "Emulator override motion disabled");
+        MainActivity activity = MainActivity.getInstance();
+        if(activity == null) return;
+        activity.onMotionChanged(inMotion);
     }
 }

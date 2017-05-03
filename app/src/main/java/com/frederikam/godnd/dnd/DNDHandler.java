@@ -20,7 +20,7 @@
  *  SOFTWARE.
  */
 
-package frederikam.com.godnd.dnd;
+package com.frederikam.godnd.dnd;
 
 import android.app.NotificationManager;
 import android.content.Context;
@@ -28,7 +28,7 @@ import android.media.AudioManager;
 import android.os.Build;
 import android.support.annotation.RequiresApi;
 
-import frederikam.com.godnd.MainActivity;
+import com.frederikam.godnd.GoDND;
 
 public class DNDHandler {
 
@@ -52,7 +52,7 @@ public class DNDHandler {
 
     @RequiresApi(api = Build.VERSION_CODES.M)
     private void handleModern(boolean enable) {
-        NotificationManager mNotificationManager = (NotificationManager) MainActivity.INSTANCE.getSystemService(Context.NOTIFICATION_SERVICE);
+        NotificationManager mNotificationManager = (NotificationManager) GoDND.getContext().getSystemService(Context.NOTIFICATION_SERVICE);
         if(enable) {
             oldNotificationPolicy = mNotificationManager.getCurrentInterruptionFilter();
             mNotificationManager.setInterruptionFilter(NotificationManager.INTERRUPTION_FILTER_ALARMS);
@@ -66,7 +66,7 @@ public class DNDHandler {
      * @param enable Whether to enable
      */
     private void handleLegacy(boolean enable) {
-        AudioManager audioManager = (AudioManager) MainActivity.INSTANCE.getSystemService(Context.AUDIO_SERVICE);
+        AudioManager audioManager = (AudioManager) GoDND.getContext().getSystemService(Context.AUDIO_SERVICE);
         if (enable) {
             oldVolumeRing = audioManager.getStreamVolume(AudioManager.STREAM_RING);
             oldVolumeNotif = audioManager.getStreamVolume(AudioManager.STREAM_NOTIFICATION);

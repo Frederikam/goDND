@@ -20,7 +20,7 @@
  *  SOFTWARE.
  */
 
-package frederikam.com.godnd.physics;
+package com.frederikam.godnd.physics;
 
 import android.content.Context;
 import android.hardware.Sensor;
@@ -28,10 +28,10 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 
+import com.frederikam.godnd.GoDND;
+
 import java.util.LinkedList;
 import java.util.Queue;
-
-import frederikam.com.godnd.MainActivity;
 
 class MotionTracker implements SensorEventListener {
 
@@ -46,7 +46,7 @@ class MotionTracker implements SensorEventListener {
         this.minHistory = maxHistory/4;
         this.maxHistory = maxHistory;
 
-        SensorManager mSensorManager = (SensorManager) MainActivity.INSTANCE.getSystemService(Context.SENSOR_SERVICE);
+        SensorManager mSensorManager = (SensorManager) GoDND.getContext().getSystemService(Context.SENSOR_SERVICE);
         Sensor mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION);
 
         mSensorManager.registerListener(this, mSensor, sleepInterval);

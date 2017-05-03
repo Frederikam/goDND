@@ -20,37 +20,23 @@
  *  SOFTWARE.
  */
 
-apply plugin: 'com.android.application'
+package com.frederikam.godnd;
 
-android {
-    compileSdkVersion 25
-    buildToolsVersion "25.0.0"
-    defaultConfig {
-        applicationId "com.frederikam.godnd"
-        minSdkVersion 16
-        targetSdkVersion 25
-        versionCode 1
-        versionName "0.1"
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
-    }
-    buildTypes {
-        release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-        }
-    }
-    lintOptions {
-        lintConfig file("lint.xml")
-    }
-}
+import android.content.Context;
 
-dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
-        exclude group: 'com.android.support', module: 'support-annotations'
-    })
-    compile 'com.android.support:appcompat-v7:25.3.1'
-    compile 'com.android.support:design:25.3.1'
+import java.lang.ref.WeakReference;
 
-    testCompile 'junit:junit:4.12'
+public class GoDND extends android.app.Application {
+
+    private static WeakReference<Context> context;
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        context = new WeakReference<>(getApplicationContext());
+    }
+
+    public static Context getContext() {
+        return context.get();
+    }
 }

@@ -20,7 +20,7 @@
  *  SOFTWARE.
  */
 
-package frederikam.com.godnd;
+package com.frederikam.godnd;
 
 import org.junit.Test;
 

@@ -20,31 +20,25 @@
  *  SOFTWARE.
  */
 
-package frederikam.com.godnd.physics;
+package com.frederikam.godnd.dnd;
 
-import android.view.View;
-import android.widget.Button;
+// Cite: http://stackoverflow.com/questions/14087322/enabling-and-disabling-vibration-in-android-programmatically
 
-import frederikam.com.godnd.MainActivity;
+import android.media.AudioManager;
 
-public class MotionManagerEmulator extends MotionManager implements Button.OnClickListener {
+@SuppressWarnings("deprecation")
+class AudioManagerCompat {
+    final static int VIBRATE_TYPE_RINGER = AudioManager.VIBRATE_TYPE_RINGER;
+    final static int VIBRATE_TYPE_NOTIFICATION = AudioManager.VIBRATE_TYPE_NOTIFICATION;
+    final static int VIBRATE_SETTING_ON = AudioManager.VIBRATE_SETTING_ON;
+    final static int VIBRATE_SETTING_OFF = AudioManager.VIBRATE_SETTING_OFF;
+    final static int VIBRATE_SETTING_ONLY_SILENT = AudioManager.VIBRATE_SETTING_ONLY_SILENT;
 
-
-
-    public MotionManagerEmulator(Button button) {
-        button.setOnClickListener(this);
-        button.setVisibility(View.VISIBLE);
+    static int getVibrateSetting(AudioManager am, int vibrateType) {
+        return am.getVibrateSetting(vibrateType);
     }
 
-    @Override
-    public synchronized void start() {
-        // Ignore
-    }
-
-    @Override
-    public void onClick(View v) {
-        inMotion = !inMotion;
-        ((Button) v).setText(inMotion ? "Emulator override motion enabled" : "Emulator override motion disabled");
-        MainActivity.INSTANCE.onMotionChanged(inMotion);
+    static void setVibrateSetting(AudioManager am, int vibrateType, int vibrateSetting) {
+        am.setVibrateSetting(vibrateType, vibrateSetting);
     }
 }

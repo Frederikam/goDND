@@ -20,7 +20,7 @@
  *  SOFTWARE.
  */
 
-package frederikam.com.godnd;
+package com.frederikam.godnd;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -28,6 +28,7 @@ import android.content.pm.PackageManager;
 import android.hardware.SensorManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -38,15 +39,17 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
-import frederikam.com.godnd.dnd.DNDHandler;
-import frederikam.com.godnd.physics.MotionManager;
-import frederikam.com.godnd.physics.MotionManagerEmulator;
+import com.frederikam.godnd.dnd.DNDHandler;
+import com.frederikam.godnd.physics.MotionManager;
+import com.frederikam.godnd.physics.MotionManagerEmulator;
+
+import java.lang.ref.WeakReference;
 
 public class MainActivity extends AppCompatActivity implements CompoundButton.OnCheckedChangeListener, Button.OnClickListener {
 
-    public static final String TAG = "frederikam.com.godnd";
+    public static final String TAG = "com.frederikam.godnd";
 
-    public static MainActivity INSTANCE;
+    private static WeakReference<MainActivity> instance;
 
     // http://stackoverflow.com/questions/2799097/how-can-i-detect-when-an-android-application-is-running-in-the-emulator
     public static final boolean IS_EMULATOR = Build.FINGERPRINT.startsWith("generic")
@@ -82,7 +85,7 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
 
         Log.i(TAG, "Creating activity: " + toString());
 
-        INSTANCE = this;
+        instance = new WeakReference<>(this);
 
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -167,5 +170,10 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
         }
 
         dndHandler.handle(enableDnd);
+    }
+
+    @Nullable
+    public static MainActivity getInstance() {
+        return instance.get();
     }
 }

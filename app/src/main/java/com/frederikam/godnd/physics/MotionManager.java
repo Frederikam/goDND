@@ -20,13 +20,13 @@
  *  SOFTWARE.
  */
 
-package frederikam.com.godnd.physics;
+package com.frederikam.godnd.physics;
 
 import android.util.Log;
 
-import frederikam.com.godnd.MainActivity;
+import com.frederikam.godnd.MainActivity;
 
-import static frederikam.com.godnd.MainActivity.TAG;
+import static com.frederikam.godnd.MainActivity.TAG;
 
 public class MotionManager extends Thread {
 
@@ -35,7 +35,7 @@ public class MotionManager extends Thread {
     private static final int SLEEP_INTERVAL = 500; // ms
 
     private MotionTracker tracker = new MotionTracker(500, 30);
-    protected boolean inMotion = false;
+    boolean inMotion = false;
 
     public MotionManager() {
         setDaemon(true);
@@ -45,7 +45,8 @@ public class MotionManager extends Thread {
     @Override
     public void run() {
         Log.i(TAG, "Started " + getName());
-         while (true) {
+        //noinspection InfiniteLoopStatement
+        while (true) {
              try {
                  sleep(SLEEP_INTERVAL);
              } catch (InterruptedException e) {
@@ -55,12 +56,16 @@ public class MotionManager extends Thread {
     }
 
     private void tick() {
+        MainActivity activity = MainActivity.getInstance();
+
         if (!inMotion && tracker.getAverageMotion() > MOTION_THRESHOLD_HIGH) {
             inMotion = true;
-            MainActivity.INSTANCE.onMotionChanged(true);
+            if(activity == null) return;
+            activity.onMotionChanged(true);
         } else if (inMotion && tracker.getAverageMotion() < MOTION_THRESHOLD_LOW) {
             inMotion = false;
-            MainActivity.INSTANCE.onMotionChanged(false);
+            if(activity == null) return;
+            activity.onMotionChanged(false);
         }
     }
 
