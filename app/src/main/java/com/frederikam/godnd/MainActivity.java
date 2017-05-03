@@ -24,9 +24,10 @@ package com.frederikam.godnd;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.NotificationManager;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.hardware.SensorManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -49,12 +50,11 @@ import com.frederikam.godnd.physics.MotionManager;
 import com.frederikam.godnd.physics.MotionManagerEmulator;
 
 import java.lang.ref.WeakReference;
-import java.util.Arrays;
 
 public class MainActivity extends AppCompatActivity implements CompoundButton.OnCheckedChangeListener, Button.OnClickListener {
 
     public static final String TAG = "com.frederikam.godnd";
-    public static final int PERMISSION_REQUEST_DND_POLICY = 1000;
+    public static final int PERMISSION_REQUEST_DND_POLICY = 100;
 
     // http://stackoverflow.com/questions/2799097/how-can-i-detect-when-an-android-application-is-running-in-the-emulator
     public static final boolean IS_EMULATOR = Build.FINGERPRINT.startsWith("generic")
@@ -67,6 +67,7 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
             || "google_sdk".equals(Build.PRODUCT);
 
     private static WeakReference<MainActivity> instance;
+    public static boolean hasRequestedDndAccess = false;
     private DNDHandler dndHandler = new DNDHandler();
     private TextView textStatus = null;
     private ToggleButton toggleButton = null;
@@ -79,14 +80,6 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        SensorManager sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
-
-        PackageManager PM= this.getPackageManager();
-        if(PM.hasSystemFeature(PackageManager.FEATURE_SENSOR_ACCELEROMETER)) {
-            Toast toast = Toast.makeText(getApplicationContext(), "This device does not support the required sensors", Toast.LENGTH_LONG);
-            toast.show();
-        }
-
         Log.i(TAG, "Creating activity: " + toString());
 
         instance = new WeakReference<>(this);
@@ -96,22 +89,9 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
         setSupportActionBar(toolbar);
 
         textStatus = (TextView) findViewById(R.id.textStatus);
-
         toggleButton = (ToggleButton) findViewById(R.id.toggleButton);
-        toggleButton.setOnCheckedChangeListener(this);
-
         passengerButton = (Button) findViewById(R.id.passengerButton);
-        passengerButton.setOnClickListener(this);
-
         passengerText = (TextView) findViewById(R.id.passengerText);
-
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-            findViewById(R.id.warningMuteText).setVisibility(View.VISIBLE);
-        }
-
-
-
-        toggleButton.setPressed(getPreferences(MODE_PRIVATE).getBoolean("isEnabled", true));
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             handlePermissions();
@@ -120,6 +100,48 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
         }
 
         render();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        PackageManager pm = this.getPackageManager();
+        if(pm.hasSystemFeature(PackageManager.FEATURE_SENSOR_ACCELEROMETER)) {
+            Toast toast = Toast.makeText(getApplicationContext(), "This device does not support the required sensors", Toast.LENGTH_LONG);
+            toast.show();
+        }
+
+        passengerButton.setOnClickListener(this);
+        toggleButton.setOnCheckedChangeListener(this);
+        toggleButton.setPressed(getPreferences(MODE_PRIVATE).getBoolean("isEnabled", true));
+
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+            findViewById(R.id.warningMuteText).setVisibility(View.VISIBLE);
+        } else {
+            NotificationManager mNotificationManager = (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
+
+            // Check if the notification policy access has been granted for the app.
+            if (!mNotificationManager.isNotificationPolicyAccessGranted() && !hasRequestedDndAccess) {
+                hasRequestedDndAccess = true;
+                Toast toast = Toast.makeText(getApplicationContext(), "GoDND must have permission to access do not disturb.", Toast.LENGTH_LONG);
+                toast.show();
+
+                // Wait a moment to let the toast show, and to not confuse the user
+                synchronized (this) {
+                    try {
+                        Thread.sleep(500);
+                    } catch (InterruptedException e) {
+                        Log.e(TAG, "Got interrupted while sleeping", e);
+                    }
+                }
+
+                Intent intent = new Intent(android.provider.Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS);
+                startActivity(intent);
+            }
+        }
+
+
     }
 
     public void onMotionChanged(boolean inMotion) {
@@ -145,7 +167,7 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
     @SuppressLint("SetTextI18n")
     private void render() {
         // Passenger mode, motion change or disable/disable
-        boolean inMotion = motionManager.isInMotion();
+        boolean inMotion = motionManager != null && motionManager.isInMotion();
         boolean isEnabled = toggleButton.isChecked();
 
         boolean enableDnd = false;
@@ -182,8 +204,7 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
             startMotionSensors();
         } else {
             ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.ACCESS_NOTIFICATION_POLICY}, PERMISSION_REQUEST_DND_POLICY);
-
+                    new String[]{Manifest.permission.ACCESS_NOTIFICATION_POLICY, Manifest.permission.WRITE_SETTINGS}, PERMISSION_REQUEST_DND_POLICY);
         }
     }
 
@@ -200,11 +221,13 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
     }
 
     @Override
+    @RequiresApi(api = Build.VERSION_CODES.M)
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
-        Log.i(TAG, "Permission results: " + requestCode + " - " + Arrays.asList(permissions) + ":"
-            + Arrays.asList(grantResults));
+        for (int i = 0; i < permissions.length; i++) {
+            Log.i(TAG, "Permission request " + requestCode + " received: " + permissions[i] + " = " + grantResults[i]);
+        }
 
         /*
         boolean cont = false;
@@ -226,10 +249,10 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
             }
         }*/
 
-        if(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_NOTIFICATION_POLICY) != PackageManager.PERMISSION_GRANTED) {
+        if(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_NOTIFICATION_POLICY) == PackageManager.PERMISSION_GRANTED) {
             startMotionSensors();
         } else {
-            Toast toast = Toast.makeText(getApplicationContext(), "GoDND needs permission to change your DND setting to work.", Toast.LENGTH_LONG);
+            Toast toast = Toast.makeText(getApplicationContext(), "GoDND needs permission to change your notification settings to work.", Toast.LENGTH_LONG);
             toast.show();
 
             finish();

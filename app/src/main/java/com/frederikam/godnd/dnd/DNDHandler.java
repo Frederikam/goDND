@@ -27,8 +27,12 @@ import android.content.Context;
 import android.media.AudioManager;
 import android.os.Build;
 import android.support.annotation.RequiresApi;
+import android.util.Log;
+import android.widget.Toast;
 
 import com.frederikam.godnd.GoDND;
+
+import static android.content.ContentValues.TAG;
 
 public class DNDHandler {
 
@@ -52,12 +56,18 @@ public class DNDHandler {
 
     @RequiresApi(api = Build.VERSION_CODES.M)
     private void handleModern(boolean enable) {
-        NotificationManager mNotificationManager = (NotificationManager) GoDND.getContext().getSystemService(Context.NOTIFICATION_SERVICE);
-        if(enable) {
-            oldNotificationPolicy = mNotificationManager.getCurrentInterruptionFilter();
-            mNotificationManager.setInterruptionFilter(NotificationManager.INTERRUPTION_FILTER_ALARMS);
-        } else {
-            mNotificationManager.setInterruptionFilter(oldNotificationPolicy);
+        try {
+            NotificationManager mNotificationManager = (NotificationManager) GoDND.getContext().getSystemService(Context.NOTIFICATION_SERVICE);
+            if (enable) {
+                oldNotificationPolicy = mNotificationManager.getCurrentInterruptionFilter();
+                mNotificationManager.setInterruptionFilter(NotificationManager.INTERRUPTION_FILTER_ALARMS);
+            } else {
+                mNotificationManager.setInterruptionFilter(oldNotificationPolicy);
+            }
+        } catch (SecurityException ex) {
+            Toast toast = Toast.makeText(GoDND.getContext(), "GoDND needs permission to access do not disturb. Please grant permissions in the settings menu for do not disturb.", Toast.LENGTH_LONG);
+            toast.show();
+            Log.e(TAG, "Failed to modify DND", ex);
         }
     }
 
