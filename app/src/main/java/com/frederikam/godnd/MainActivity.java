@@ -22,13 +22,18 @@
 
 package com.frederikam.godnd;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.hardware.SensorManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.RequiresApi;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -44,12 +49,12 @@ import com.frederikam.godnd.physics.MotionManager;
 import com.frederikam.godnd.physics.MotionManagerEmulator;
 
 import java.lang.ref.WeakReference;
+import java.util.Arrays;
 
 public class MainActivity extends AppCompatActivity implements CompoundButton.OnCheckedChangeListener, Button.OnClickListener {
 
     public static final String TAG = "com.frederikam.godnd";
-
-    private static WeakReference<MainActivity> instance;
+    public static final int PERMISSION_REQUEST_DND_POLICY = 1000;
 
     // http://stackoverflow.com/questions/2799097/how-can-i-detect-when-an-android-application-is-running-in-the-emulator
     public static final boolean IS_EMULATOR = Build.FINGERPRINT.startsWith("generic")
@@ -61,6 +66,7 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
             || (Build.BRAND.startsWith("generic") && Build.DEVICE.startsWith("generic"))
             || "google_sdk".equals(Build.PRODUCT);
 
+    private static WeakReference<MainActivity> instance;
     private DNDHandler dndHandler = new DNDHandler();
     private TextView textStatus = null;
     private ToggleButton toggleButton = null;
@@ -68,8 +74,6 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
     private TextView passengerText = null;
     private MotionManager motionManager = null;
     private boolean isPassengerMode = false;
-
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -105,15 +109,15 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
             findViewById(R.id.warningMuteText).setVisibility(View.VISIBLE);
         }
 
-        // The emulator does not support our sensors :/
-        if(!IS_EMULATOR) {
-            motionManager = new MotionManager();
-            motionManager.start();
-        } else {
-            motionManager = new MotionManagerEmulator((Button) findViewById(R.id.emulatorMotion));
-        }
+
 
         toggleButton.setPressed(getPreferences(MODE_PRIVATE).getBoolean("isEnabled", true));
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            handlePermissions();
+        } else {
+            startMotionSensors();
+        }
 
         render();
     }
@@ -170,6 +174,66 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
         }
 
         dndHandler.handle(enableDnd);
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.M)
+    private void handlePermissions() {
+        if(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_NOTIFICATION_POLICY) != PackageManager.PERMISSION_GRANTED) {
+            startMotionSensors();
+        } else {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.ACCESS_NOTIFICATION_POLICY}, PERMISSION_REQUEST_DND_POLICY);
+
+        }
+    }
+
+    private void startMotionSensors() {
+        if(motionManager != null) return;
+
+        // The emulator does not support our sensors :/
+        if(!IS_EMULATOR) {
+            motionManager = new MotionManager();
+            motionManager.start();
+        } else {
+            motionManager = new MotionManagerEmulator((Button) findViewById(R.id.emulatorMotion));
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        Log.i(TAG, "Permission results: " + requestCode + " - " + Arrays.asList(permissions) + ":"
+            + Arrays.asList(grantResults));
+
+        /*
+        boolean cont = false;
+
+        for (int i = 0; i < permissions.length; i++) {
+            String perm = permissions[i];
+
+            switch (perm) {
+                case Manifest.permission.ACCESS_NOTIFICATION_POLICY:
+                    if(grantResults[i] == PackageManager.PERMISSION_GRANTED) {
+                        cont = true;
+                    } else {
+                        Log.e(TAG, "Not granted DND permission! Result: " + grantResults[i]);
+                    }
+                    break;
+                default:
+                    Log.w(TAG, "Got unexpected permission result:" + perm + ":" + grantResults[i])
+                    break;
+            }
+        }*/
+
+        if(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_NOTIFICATION_POLICY) != PackageManager.PERMISSION_GRANTED) {
+            startMotionSensors();
+        } else {
+            Toast toast = Toast.makeText(getApplicationContext(), "GoDND needs permission to change your DND setting to work.", Toast.LENGTH_LONG);
+            toast.show();
+
+            finish();
+        }
     }
 
     @Nullable

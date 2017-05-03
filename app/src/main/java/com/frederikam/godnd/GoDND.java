@@ -39,4 +39,5 @@ public class GoDND extends android.app.Application {
     public static Context getContext() {
         return context.get();
     }
+
 }
