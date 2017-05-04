@@ -46,7 +46,11 @@ class LinearMotionTracker extends MotionTracker {
         if(System.currentTimeMillis() - lastEventSavedTime < sleepInterval)
             return;
 
-        double len = Math.sqrt((event.values[0]*event.values[0] + event.values[1]*event.values[1] + event.values[2]*event.values[2]));
+        double len = Math.sqrt(
+                Math.pow(Math.abs(event.values[0]), 2) +
+                Math.pow(Math.abs(event.values[0]), 2) +
+                Math.pow(Math.abs(event.values[0]), 2)
+        );
         addMotion(len);
     }
 

@@ -179,13 +179,11 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
 
     @SuppressLint("SetTextI18n")
     private void render() {
-        // Passenger mode, motion change or disable/disable
+        // Passenger mode, motion change or enable/disable
         boolean inMotion = motionManager != null && motionManager.isInMotion();
         boolean isEnabled = toggleButton.isChecked();
 
         boolean enableDnd = false;
-
-        Log.i(TAG, "Render: inMotion:"+inMotion + " isEnabled:"+isEnabled + " isPassengerMode"+isPassengerMode);
 
         if (isEnabled) {
             textStatus.setVisibility(View.VISIBLE);

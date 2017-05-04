@@ -84,7 +84,7 @@
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="36dp"
         android:text="Emulator override motion enabled"
-        android:visibility="invisible" />
+        android:visibility="gone" />
 
     <TextView
         android:id="@+id/warningMuteText"

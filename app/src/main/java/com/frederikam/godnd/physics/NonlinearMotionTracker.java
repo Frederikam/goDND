@@ -32,7 +32,7 @@ import com.frederikam.godnd.GoDND;
 
 class NonlinearMotionTracker extends MotionTracker {
 
-    private static final double G = 9.2;
+    private static final double G = 9.81;
 
     NonlinearMotionTracker(int sleepInterval, int maxHistory) {
         super(sleepInterval, maxHistory);
@@ -51,7 +51,11 @@ class NonlinearMotionTracker extends MotionTracker {
         if(System.currentTimeMillis() - lastEventSavedTime < sleepInterval)
             return;
 
-        double len = Math.sqrt((event.values[0]*event.values[0] + event.values[1]*event.values[1] + event.values[2]*event.values[2]));
+        double len = Math.sqrt(
+                Math.pow(Math.abs(event.values[0]), 2) +
+                Math.pow(Math.abs(event.values[0]), 2) +
+                Math.pow(Math.abs(event.values[0]), 2)
+        );
 
         // Attempt to remove gravity
         len -= G;
