@@ -43,7 +43,7 @@ class LinearMotionTracker extends MotionTracker {
     @Override
     public void onSensorChanged(SensorEvent event) {
         // Make sure we're not getting events too fast
-        if(lastEventSavedTime - System.currentTimeMillis() < sleepInterval)
+        if(System.currentTimeMillis() - lastEventSavedTime < sleepInterval)
             return;
 
         double len = Math.sqrt((event.values[0]*event.values[0] + event.values[1]*event.values[1] + event.values[2]*event.values[2]));

@@ -30,9 +30,9 @@ public abstract class MotionManager extends Thread {
 
     private static final int SLEEP_INTERVAL = 500; // ms
 
-    public MotionManager(String name) {
+    MotionManager(String name) {
         setDaemon(true);
-        setName("LinearMotionManager");
+        setName(name);
     }
 
     @Override

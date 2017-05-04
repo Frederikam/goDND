@@ -26,8 +26,8 @@ import com.frederikam.godnd.MainActivity;
 
 public class LinearMotionManager extends MotionManager {
 
-    private static final double MOTION_THRESHOLD_HIGH = 3; // m/s
-    private static final double MOTION_THRESHOLD_LOW = 1; // m/s
+    private static final double MOTION_THRESHOLD_HIGH = 8; // m/s
+    private static final double MOTION_THRESHOLD_LOW = 1.5; // m/s
 
     private MotionTracker tracker = new LinearMotionTracker(500, 30);
     private boolean inMotion = false;

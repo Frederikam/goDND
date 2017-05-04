@@ -26,8 +26,8 @@ import com.frederikam.godnd.MainActivity;
 
 public class NonlinearMotionManager extends MotionManager {
 
-    private static final double MOTION_THRESHOLD_HIGH = 4; // m/s
-    private static final double MOTION_THRESHOLD_LOW = 1; // m/s
+    private static final double MOTION_THRESHOLD_HIGH = 8; // m/s
+    private static final double MOTION_THRESHOLD_LOW = 2; // m/s
 
     private MotionTracker tracker = new NonlinearMotionTracker(500, 30);
     private boolean inMotion = false;

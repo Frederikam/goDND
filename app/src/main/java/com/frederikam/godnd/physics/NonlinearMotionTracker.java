@@ -26,6 +26,7 @@ import android.content.Context;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorManager;
+import android.util.Log;
 
 import com.frederikam.godnd.GoDND;
 
@@ -39,18 +40,20 @@ class NonlinearMotionTracker extends MotionTracker {
         SensorManager mSensorManager = (SensorManager) GoDND.getContext().getSystemService(Context.SENSOR_SERVICE);
         Sensor mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
 
+        Log.i(com.frederikam.godnd.MainActivity.TAG, "Registered listener");
+
         mSensorManager.registerListener(this, mSensor, sleepInterval);
     }
 
     @Override
     public void onSensorChanged(SensorEvent event) {
         // Make sure we're not getting events too fast
-        if(lastEventSavedTime - System.currentTimeMillis() < sleepInterval)
+        if(System.currentTimeMillis() - lastEventSavedTime < sleepInterval)
             return;
 
         double len = Math.sqrt((event.values[0]*event.values[0] + event.values[1]*event.values[1] + event.values[2]*event.values[2]));
 
-        // Attempt to remote gravity
+        // Attempt to remove gravity
         len -= G;
 
         addMotion(len);

@@ -24,6 +24,11 @@ package com.frederikam.godnd.physics;
 
 import android.hardware.SensorEventListener;
 import android.util.Log;
+import android.view.View;
+import android.widget.TextView;
+
+import com.frederikam.godnd.MainActivity;
+import com.frederikam.godnd.R;
 
 import java.util.LinkedList;
 import java.util.Queue;
@@ -70,5 +75,18 @@ abstract class MotionTracker implements SensorEventListener {
         }
 
         lastEventSavedTime = System.currentTimeMillis();
+
+        // Debug!
+        try {
+            MainActivity activity = MainActivity.getInstance();
+
+            if(activity != null) {
+                TextView tv = (TextView) activity.findViewById(R.id.debugText);
+                tv.setVisibility(View.VISIBLE);
+                tv.setText(Math.floor(magnitude*100)/100 + ":" + Math.floor(getAverageMotion()*100)/100);
+            }
+        } catch (Exception ex) {
+            Log.e(TAG, "Error while debugging motion", ex);
+        }
     }
 }

@@ -121,6 +121,7 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
         passengerButton.setOnClickListener(this);
         toggleButton.setOnCheckedChangeListener(this);
         toggleButton.setPressed(getPreferences(MODE_PRIVATE).getBoolean("isEnabled", true));
+        toggleButton.setChecked(getPreferences(MODE_PRIVATE).getBoolean("isEnabled", true));
         emulatorButton.setOnLongClickListener(this);
 
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
@@ -153,7 +154,12 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
 
     public void onMotionChanged(boolean inMotion) {
         isPassengerMode = false;
-        render();
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                render();
+            }
+        });
     }
 
     @Override
@@ -187,7 +193,7 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
             passengerText.setVisibility(inMotion ? View.VISIBLE : View.INVISIBLE);
 
             if(!inMotion) {
-                textStatus.setText("You are not in motion. Move around for a few seconds and you" +
+                textStatus.setText("You are not in motion. Move around for a few seconds and" +
                         " the app will enable do not disturb mode.");
             } else if (!isPassengerMode) {
                 textStatus.setText("You are now in motion and incoming SMS and calls have been" +
@@ -221,7 +227,7 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
         // The emulator does not support our sensors :/
         boolean emulatePhysics = false;
 
-        if(!IS_EMULATOR && !emulatePhysics) {
+        if(!IS_EMULATOR || !emulatePhysics) {
             PackageManager pm = this.getPackageManager();
             if(pm.hasSystemFeature(PackageManager.FEATURE_SENSOR_GYROSCOPE)) {
                 motionManager = new LinearMotionManager();
