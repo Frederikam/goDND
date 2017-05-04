@@ -22,34 +22,26 @@
 
 package com.frederikam.godnd.physics;
 
-import android.content.Context;
-import android.hardware.Sensor;
-import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
-import android.hardware.SensorManager;
-
-import com.frederikam.godnd.GoDND;
+import android.util.Log;
 
 import java.util.LinkedList;
 import java.util.Queue;
 
-class MotionTracker implements SensorEventListener {
+import static com.frederikam.godnd.MainActivity.TAG;
+
+abstract class MotionTracker implements SensorEventListener {
 
     private final Queue<Double> motion = new LinkedList<>();
     private final int minHistory;
     private final int maxHistory;
-    private long lastEventSavedTime = 0;
-    private long sleepInterval;
+    long lastEventSavedTime = 0;
+    long sleepInterval;
 
     MotionTracker(int sleepInterval, int maxHistory) {
         this.sleepInterval = sleepInterval;
         this.minHistory = maxHistory/4;
         this.maxHistory = maxHistory;
-
-        SensorManager mSensorManager = (SensorManager) GoDND.getContext().getSystemService(Context.SENSOR_SERVICE);
-        Sensor mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION);
-
-        mSensorManager.registerListener(this, mSensor, sleepInterval);
     }
 
     double getAverageMotion() {
@@ -67,14 +59,10 @@ class MotionTracker implements SensorEventListener {
         return total / motion.size();
     }
 
-    @Override
-    public void onSensorChanged(SensorEvent event) {
-        // Make sure we're not getting events too fast
-        if(lastEventSavedTime - System.currentTimeMillis() > sleepInterval)
-            return;
+    void addMotion(double magnitude) {
+        motion.add(magnitude);
 
-        double len = Math.sqrt((event.values[0]*event.values[0] + event.values[1]*event.values[1] + event.values[2]*event.values[2]));
-        motion.add(len);
+        Log.i(TAG, "test " + magnitude);
 
         if(motion.size() > maxHistory) {
             // Clear old data
@@ -82,10 +70,5 @@ class MotionTracker implements SensorEventListener {
         }
 
         lastEventSavedTime = System.currentTimeMillis();
-    }
-
-    @Override
-    public void onAccuracyChanged(Sensor sensor, int accuracy) {
-        // Ignore
     }
 }

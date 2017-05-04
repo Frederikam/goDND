@@ -20,37 +20,37 @@
  *  SOFTWARE.
  */
 
-apply plugin: 'com.android.application'
+package com.frederikam.godnd.physics;
 
-android {
-    compileSdkVersion 25
-    buildToolsVersion "25.0.0"
-    defaultConfig {
-        applicationId "com.frederikam.godnd"
-        minSdkVersion 16
-        targetSdkVersion 25
-        versionCode 2
-        versionName "0.2"
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
-    }
-    buildTypes {
-        release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-        }
-    }
-    lintOptions {
-        lintConfig file("lint.xml")
-    }
-}
+import android.view.View;
+import android.widget.Button;
 
-dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
-        exclude group: 'com.android.support', module: 'support-annotations'
-    })
-    compile 'com.android.support:appcompat-v7:25.3.1'
-    compile 'com.android.support:design:25.3.1'
+import com.frederikam.godnd.MainActivity;
 
-    testCompile 'junit:junit:4.12'
+public class EmulatorMotionManager extends MotionManager implements Button.OnClickListener {
+
+    private boolean inMotion = false;
+
+    public EmulatorMotionManager(Button button) {
+        super("EmulatorMotionManager");
+        button.setOnClickListener(this);
+        button.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    public void onClick(View v) {
+        inMotion = !inMotion;
+        ((Button) v).setText(inMotion ? "Emulator override motion enabled" : "Emulator override motion disabled");
+        MainActivity activity = MainActivity.getInstance();
+        if(activity == null) return;
+        activity.onMotionChanged(inMotion);
+    }
+
+    @Override
+    void tick() {}
+
+    @Override
+    public boolean isInMotion() {
+        return inMotion;
+    }
 }

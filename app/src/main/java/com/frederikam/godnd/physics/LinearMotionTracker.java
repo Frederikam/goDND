@@ -20,37 +20,39 @@
  *  SOFTWARE.
  */
 
-apply plugin: 'com.android.application'
+package com.frederikam.godnd.physics;
 
-android {
-    compileSdkVersion 25
-    buildToolsVersion "25.0.0"
-    defaultConfig {
-        applicationId "com.frederikam.godnd"
-        minSdkVersion 16
-        targetSdkVersion 25
-        versionCode 2
-        versionName "0.2"
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
-    }
-    buildTypes {
-        release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-        }
-    }
-    lintOptions {
-        lintConfig file("lint.xml")
-    }
-}
+import android.content.Context;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorManager;
 
-dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
-        exclude group: 'com.android.support', module: 'support-annotations'
-    })
-    compile 'com.android.support:appcompat-v7:25.3.1'
-    compile 'com.android.support:design:25.3.1'
+import com.frederikam.godnd.GoDND;
 
-    testCompile 'junit:junit:4.12'
+class LinearMotionTracker extends MotionTracker {
+
+    LinearMotionTracker(int sleepInterval, int maxHistory) {
+        super(sleepInterval, maxHistory);
+
+        SensorManager mSensorManager = (SensorManager) GoDND.getContext().getSystemService(Context.SENSOR_SERVICE);
+        Sensor mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION);
+
+        mSensorManager.registerListener(this, mSensor, sleepInterval);
+    }
+
+    @Override
+    public void onSensorChanged(SensorEvent event) {
+        // Make sure we're not getting events too fast
+        if(lastEventSavedTime - System.currentTimeMillis() < sleepInterval)
+            return;
+
+        double len = Math.sqrt((event.values[0]*event.values[0] + event.values[1]*event.values[1] + event.values[2]*event.values[2]));
+        addMotion(len);
+    }
+
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {
+        // Ignore
+    }
+
 }

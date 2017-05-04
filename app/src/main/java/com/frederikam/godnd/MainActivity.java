@@ -46,8 +46,10 @@ import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import com.frederikam.godnd.dnd.DNDHandler;
+import com.frederikam.godnd.physics.EmulatorMotionManager;
+import com.frederikam.godnd.physics.LinearMotionManager;
 import com.frederikam.godnd.physics.MotionManager;
-import com.frederikam.godnd.physics.MotionManagerEmulator;
+import com.frederikam.godnd.physics.NonlinearMotionManager;
 
 import java.lang.ref.WeakReference;
 
@@ -111,7 +113,7 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
         super.onStart();
 
         PackageManager pm = this.getPackageManager();
-        if(pm.hasSystemFeature(PackageManager.FEATURE_SENSOR_ACCELEROMETER)) {
+        if(!pm.hasSystemFeature(PackageManager.FEATURE_SENSOR_ACCELEROMETER)) {
             Toast toast = Toast.makeText(getApplicationContext(), "This device does not support the required sensors", Toast.LENGTH_LONG);
             toast.show();
         }
@@ -205,7 +207,7 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
 
     @RequiresApi(api = Build.VERSION_CODES.M)
     private void handlePermissions() {
-        if(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_NOTIFICATION_POLICY) != PackageManager.PERMISSION_GRANTED) {
+        if(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_NOTIFICATION_POLICY) == PackageManager.PERMISSION_GRANTED) {
             startMotionSensors();
         } else {
             ActivityCompat.requestPermissions(this,
@@ -217,12 +219,21 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
         if(motionManager != null) return;
 
         // The emulator does not support our sensors :/
-        if(!IS_EMULATOR) {
-            motionManager = new MotionManager();
-            motionManager.start();
+        boolean emulatePhysics = false;
+
+        if(!IS_EMULATOR && !emulatePhysics) {
+            PackageManager pm = this.getPackageManager();
+            if(pm.hasSystemFeature(PackageManager.FEATURE_SENSOR_GYROSCOPE)) {
+                motionManager = new LinearMotionManager();
+            } else {
+                motionManager = new NonlinearMotionManager();
+            }
+
         } else {
-            motionManager = new MotionManagerEmulator(emulatorButton);
+            motionManager = new EmulatorMotionManager(emulatorButton);
         }
+
+        motionManager.start();
     }
 
     @Override

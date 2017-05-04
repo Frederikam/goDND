@@ -22,31 +22,37 @@
 
 package com.frederikam.godnd.physics;
 
-import android.view.View;
-import android.widget.Button;
-
 import com.frederikam.godnd.MainActivity;
 
-public class MotionManagerEmulator extends MotionManager implements Button.OnClickListener {
+public class NonlinearMotionManager extends MotionManager {
 
+    private static final double MOTION_THRESHOLD_HIGH = 4; // m/s
+    private static final double MOTION_THRESHOLD_LOW = 1; // m/s
 
+    private MotionTracker tracker = new NonlinearMotionTracker(500, 30);
+    private boolean inMotion = false;
 
-    public MotionManagerEmulator(Button button) {
-        button.setOnClickListener(this);
-        button.setVisibility(View.VISIBLE);
+    public NonlinearMotionManager() {
+        super("NonlinearMotionManager");
     }
 
     @Override
-    public synchronized void start() {
-        // Ignore
-    }
-
-    @Override
-    public void onClick(View v) {
-        inMotion = !inMotion;
-        ((Button) v).setText(inMotion ? "Emulator override motion enabled" : "Emulator override motion disabled");
+    void tick() {
         MainActivity activity = MainActivity.getInstance();
-        if(activity == null) return;
-        activity.onMotionChanged(inMotion);
+
+        if (!inMotion && tracker.getAverageMotion() > MOTION_THRESHOLD_HIGH) {
+            inMotion = true;
+            if(activity == null) return;
+            activity.onMotionChanged(true);
+        } else if (inMotion && tracker.getAverageMotion() < MOTION_THRESHOLD_LOW) {
+            inMotion = false;
+            if(activity == null) return;
+            activity.onMotionChanged(false);
+        }
     }
+
+    public boolean isInMotion() {
+        return inMotion;
+    }
+
 }

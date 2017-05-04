@@ -22,36 +22,43 @@
 
 package com.frederikam.godnd.physics;
 
-import android.util.Log;
+import android.content.Context;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorManager;
 
-import static com.frederikam.godnd.MainActivity.TAG;
+import com.frederikam.godnd.GoDND;
 
-public abstract class MotionManager extends Thread {
+class NonlinearMotionTracker extends MotionTracker {
 
-    private static final int SLEEP_INTERVAL = 500; // ms
+    private static final double G = 9.2;
 
-    public MotionManager(String name) {
-        setDaemon(true);
-        setName("LinearMotionManager");
+    NonlinearMotionTracker(int sleepInterval, int maxHistory) {
+        super(sleepInterval, maxHistory);
+
+        SensorManager mSensorManager = (SensorManager) GoDND.getContext().getSystemService(Context.SENSOR_SERVICE);
+        Sensor mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+
+        mSensorManager.registerListener(this, mSensor, sleepInterval);
     }
 
     @Override
-    public void run() {
-        Log.i(TAG, "Started " + getName());
-        //noinspection InfiniteLoopStatement
-        while (true) {
-            try {
-                sleep(SLEEP_INTERVAL);
-                tick();
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-        }
+    public void onSensorChanged(SensorEvent event) {
+        // Make sure we're not getting events too fast
+        if(lastEventSavedTime - System.currentTimeMillis() < sleepInterval)
+            return;
+
+        double len = Math.sqrt((event.values[0]*event.values[0] + event.values[1]*event.values[1] + event.values[2]*event.values[2]));
+
+        // Attempt to remote gravity
+        len -= G;
+
+        addMotion(len);
     }
 
-    abstract void tick();
-
-    public abstract boolean isInMotion();
-
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {
+        // Ignore
+    }
 
 }
