@@ -51,7 +51,7 @@ import com.frederikam.godnd.physics.MotionManagerEmulator;
 
 import java.lang.ref.WeakReference;
 
-public class MainActivity extends AppCompatActivity implements CompoundButton.OnCheckedChangeListener, Button.OnClickListener {
+public class MainActivity extends AppCompatActivity implements CompoundButton.OnCheckedChangeListener, Button.OnClickListener, Button.OnLongClickListener {
 
     public static final String TAG = "com.frederikam.godnd";
     public static final int PERMISSION_REQUEST_DND_POLICY = 100;
@@ -74,6 +74,8 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
     private Button passengerButton = null;
     private TextView passengerText = null;
     private MotionManager motionManager = null;
+    private Button emulatorButton = null;
+    private TextView warningMuteText = null;
     private boolean isPassengerMode = false;
 
     @Override
@@ -92,6 +94,8 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
         toggleButton = (ToggleButton) findViewById(R.id.toggleButton);
         passengerButton = (Button) findViewById(R.id.passengerButton);
         passengerText = (TextView) findViewById(R.id.passengerText);
+        emulatorButton = (Button) findViewById(R.id.emulatorMotion);
+        warningMuteText = (TextView) findViewById(R.id.warningMuteText);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             handlePermissions();
@@ -115,9 +119,10 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
         passengerButton.setOnClickListener(this);
         toggleButton.setOnCheckedChangeListener(this);
         toggleButton.setPressed(getPreferences(MODE_PRIVATE).getBoolean("isEnabled", true));
+        emulatorButton.setOnLongClickListener(this);
 
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-            findViewById(R.id.warningMuteText).setVisibility(View.VISIBLE);
+            warningMuteText.setVisibility(View.VISIBLE);
         } else {
             NotificationManager mNotificationManager = (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
 
@@ -216,7 +221,7 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
             motionManager = new MotionManager();
             motionManager.start();
         } else {
-            motionManager = new MotionManagerEmulator((Button) findViewById(R.id.emulatorMotion));
+            motionManager = new MotionManagerEmulator(emulatorButton);
         }
     }
 
@@ -259,8 +264,19 @@ public class MainActivity extends AppCompatActivity implements CompoundButton.On
         }
     }
 
+    @Override
+    public boolean onLongClick(View v) {
+        //Long press on the emulator button. Clears to UI so we can take screenshots =D
+
+        emulatorButton.setVisibility(View.INVISIBLE);
+        warningMuteText.setVisibility(View.INVISIBLE);
+
+        return true;
+    }
+
     @Nullable
     public static MainActivity getInstance() {
         return instance.get();
     }
+
 }
