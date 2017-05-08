@@ -22,34 +22,46 @@
 
 package com.frederikam.godnd.physics;
 
+import android.content.Context;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.util.Log;
-import android.view.View;
-import android.widget.TextView;
 
-import com.frederikam.godnd.MainActivity;
-import com.frederikam.godnd.R;
+import com.frederikam.godnd.GoDND;
 
 import java.util.LinkedList;
 import java.util.Queue;
 
 import static com.frederikam.godnd.MainActivity.TAG;
 
-abstract class MotionTracker implements SensorEventListener {
+class MotionTracker implements SensorEventListener {
+
+    private static final double G = 9.82;
 
     private final Queue<Double> motion = new LinkedList<>();
     private final int minHistory;
     private final int maxHistory;
-    long lastEventSavedTime = 0;
-    long sleepInterval;
+    private long lastEventSavedTime = 0;
+    private long sleepInterval;
 
-    MotionTracker(int sleepInterval, int maxHistory) {
+    private double[] curVelocity = {0, 0, 0}; // 0m/s is a good guess
+    private long lastUpdate = System.nanoTime();
+    private long start = System.currentTimeMillis();
+
+    MotionTracker(int sleepInterval, int maxHistory, int sensorType) {
         this.sleepInterval = sleepInterval;
         this.minHistory = maxHistory/4;
         this.maxHistory = maxHistory;
+
+        SensorManager mSensorManager = (SensorManager) GoDND.getContext().getSystemService(Context.SENSOR_SERVICE);
+        Sensor mSensor = mSensorManager.getDefaultSensor(sensorType);
+
+        mSensorManager.registerListener(this, mSensor, sleepInterval);
     }
 
-    double getAverageMotion() {
+    double getAverageVelocity() {
         // Returns a negative number if we have too little history
         if (motion.size() < minHistory) {
             return Double.MIN_VALUE;
@@ -64,7 +76,7 @@ abstract class MotionTracker implements SensorEventListener {
         return total / motion.size();
     }
 
-    void addMotion(double magnitude) {
+    private void addMotion(double magnitude) {
         motion.add(magnitude);
 
         Log.i(TAG, "test " + magnitude);
@@ -77,16 +89,52 @@ abstract class MotionTracker implements SensorEventListener {
         lastEventSavedTime = System.currentTimeMillis();
 
         // Debug!
-        try {
+        /*try {
             MainActivity activity = MainActivity.getInstance();
 
             if(activity != null) {
                 TextView tv = (TextView) activity.findViewById(R.id.debugText);
                 tv.setVisibility(View.VISIBLE);
-                tv.setText(Math.floor(magnitude*100)/100 + ":" + Math.floor(getAverageMotion()*100)/100);
+                tv.setText(Math.floor(magnitude*100)/100 + ":" + Math.floor(getAverageVelocity()*100)/100);
             }
         } catch (Exception ex) {
             Log.e(TAG, "Error while debugging motion", ex);
+        }*/
+    }
+
+    @Override
+    public void onSensorChanged(SensorEvent event) {
+        long nanoTime = System.nanoTime();
+        double nanoDiffInSeconds = ((double)(nanoTime - lastUpdate))/1000000000;
+
+        curVelocity[0] = curVelocity[0] + (double)(event.values[0]) * nanoDiffInSeconds;
+        curVelocity[1] = curVelocity[1] + (double)(event.values[1]) * nanoDiffInSeconds;
+        curVelocity[2] = curVelocity[2] + (double)(event.values[2]) * nanoDiffInSeconds;
+
+        lastUpdate = nanoTime;
+
+        // Make sure we're not adding to the queue too fast
+        if(System.currentTimeMillis() - lastEventSavedTime < sleepInterval)
+            return;
+
+        double vel = Math.sqrt(
+                Math.pow(curVelocity[0], 2)
+                + Math.pow(curVelocity[1], 2)
+                + Math.pow(curVelocity[2], 2)
+        );
+
+        // Attempt to eliminate gravity
+        if(event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+            double secondsSinceStart = ((double) (start - System.currentTimeMillis()))/1000;
+            vel -= G * secondsSinceStart;
+            Log.i(TAG, "VEL "+(G * secondsSinceStart));
         }
+
+        addMotion(vel);
+    }
+
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {
+        // Ignore
     }
 }

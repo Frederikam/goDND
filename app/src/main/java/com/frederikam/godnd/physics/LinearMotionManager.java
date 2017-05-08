@@ -22,6 +22,8 @@
 
 package com.frederikam.godnd.physics;
 
+import android.hardware.Sensor;
+
 import com.frederikam.godnd.MainActivity;
 
 public class LinearMotionManager extends MotionManager {
@@ -29,7 +31,7 @@ public class LinearMotionManager extends MotionManager {
     private static final double MOTION_THRESHOLD_HIGH = 8; // m/s
     private static final double MOTION_THRESHOLD_LOW = 1.5; // m/s
 
-    private MotionTracker tracker = new LinearMotionTracker(500, 30);
+    private MotionTracker tracker = new MotionTracker(500, 30, Sensor.TYPE_LINEAR_ACCELERATION);
     private boolean inMotion = false;
 
     public LinearMotionManager() {
@@ -40,11 +42,11 @@ public class LinearMotionManager extends MotionManager {
     void tick() {
         MainActivity activity = MainActivity.getInstance();
 
-        if (!inMotion && tracker.getAverageMotion() > MOTION_THRESHOLD_HIGH) {
+        if (!inMotion && tracker.getAverageVelocity() > MOTION_THRESHOLD_HIGH) {
             inMotion = true;
             if(activity == null) return;
             activity.onMotionChanged(true);
-        } else if (inMotion && tracker.getAverageMotion() < MOTION_THRESHOLD_LOW) {
+        } else if (inMotion && tracker.getAverageVelocity() < MOTION_THRESHOLD_LOW) {
             inMotion = false;
             if(activity == null) return;
             activity.onMotionChanged(false);
